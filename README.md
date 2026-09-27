@@ -13,6 +13,7 @@ Assignment 2 – Weather Intelligence API.
 | **Student ID** | 25522436 |
 | **Location** | Sydney, NSW (-33.8688, 151.2093) |
 | **Data source** | [Open-Meteo Historical Weather API](https://open-meteo.com/en/docs/historical-weather-api) |
+| **Live API** | https://weather-intelligence-api-rtyi.onrender.com ([docs](https://weather-intelligence-api-rtyi.onrender.com/docs), [API repo](https://github.com/Arshh-Mansuri/36120-26SP-AT2-25522436-api)) |
 
 ## Prediction targets
 
