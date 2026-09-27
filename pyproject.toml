@@ -25,6 +25,7 @@ dependencies = [
     "matplotlib",
     "notebook",
     "numpy",
+    "optuna>=5.0.0",
     "pandas",
     "pip",
     "pyarrow",

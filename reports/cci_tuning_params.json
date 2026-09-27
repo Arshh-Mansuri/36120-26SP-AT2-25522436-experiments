@@ -1,0 +1,74 @@
+{
+  "1 | raw+lags+calendar | XGBoost": {
+    "n_estimators": 800,
+    "learning_rate": 0.03235188302117385,
+    "max_depth": 3,
+    "min_child_weight": 1,
+    "subsample": 0.6554911608578311,
+    "colsample_bytree": 0.4276283254187229,
+    "reg_lambda": 9.31504999849916,
+    "reg_alpha": 0.3550012525851162,
+    "objective": "reg:squarederror"
+  },
+  "1 | raw+lags+calendar | LightGBM": {
+    "n_estimators": 600,
+    "learning_rate": 0.020643486486561405,
+    "num_leaves": 22,
+    "min_child_samples": 109,
+    "subsample": 0.5842255420656071,
+    "colsample_bytree": 0.5786953327175225,
+    "reg_lambda": 1.1855556548854769,
+    "objective": "regression"
+  },
+  "1 | raw+lags+calendar | Ridge": {
+    "alpha": 3.14891164795686
+  },
+  "2 | raw+lags+calendar | XGBoost": {
+    "n_estimators": 700,
+    "learning_rate": 0.025619634396650378,
+    "max_depth": 2,
+    "min_child_weight": 6,
+    "subsample": 0.7405244133540085,
+    "colsample_bytree": 0.45713583008612285,
+    "reg_lambda": 16.320075505077035,
+    "reg_alpha": 0.9942990978655647,
+    "objective": "reg:squarederror"
+  },
+  "2 | raw+lags+calendar | LightGBM": {
+    "n_estimators": 500,
+    "learning_rate": 0.011963764382790322,
+    "num_leaves": 21,
+    "min_child_samples": 15,
+    "subsample": 0.6460723242676091,
+    "colsample_bytree": 0.4564532903055842,
+    "reg_lambda": 0.13901420350545915,
+    "objective": "regression"
+  },
+  "2 | raw+lags+calendar | Ridge": {
+    "alpha": 291.5443189153751
+  },
+  "3 | raw+lags+calendar | XGBoost": {
+    "n_estimators": 200,
+    "learning_rate": 0.042356773126632795,
+    "max_depth": 5,
+    "min_child_weight": 7,
+    "subsample": 0.8854835899772805,
+    "colsample_bytree": 0.5456569174550735,
+    "reg_lambda": 2.5753735248615603,
+    "reg_alpha": 0.05130551760589835,
+    "objective": "reg:absoluteerror"
+  },
+  "3 | raw+lags+calendar | LightGBM": {
+    "n_estimators": 500,
+    "learning_rate": 0.011963764382790322,
+    "num_leaves": 21,
+    "min_child_samples": 15,
+    "subsample": 0.6460723242676091,
+    "colsample_bytree": 0.4564532903055842,
+    "reg_lambda": 0.13901420350545915,
+    "objective": "regression"
+  },
+  "3 | raw+lags+calendar | Ridge": {
+    "alpha": 0.1707396743152812
+  }
+}
