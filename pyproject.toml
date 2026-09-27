@@ -38,6 +38,7 @@ dependencies = [
     "statsmodels",
     "tqdm",
     "typer",
+    "utstd",
     "xgboost",
 ]
 requires-python = "~=3.12.0"
