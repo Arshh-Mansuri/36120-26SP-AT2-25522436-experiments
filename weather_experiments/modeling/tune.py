@@ -109,9 +109,10 @@ def tune_cci(table, feature_sets, trials):
                 n = trials if model_name != "Ridge" else 10
                 study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=SEED),
                                             study_name=f"CCI t+{h} {model_name}")
-                study.optimize(lambda tr: cv_mae(lambda: space(tr), d, cols, target, h)[0], n_trials=n, callbacks=[log_trial])
+                study.optimize(lambda tr, space=space, d=d, cols=cols, target=target, h=h:
+                               cv_mae(lambda: space(tr), d, cols, target, h)[0], n_trials=n, callbacks=[log_trial])
                 frozen = optuna.trial.FixedTrial(study.best_params)
-                cv, oof[model_name] = cv_mae(lambda: space(frozen), d, cols, target, h)
+                cv, oof[model_name] = cv_mae(lambda space=space, frozen=frozen: space(frozen), d, cols, target, h)
                 model = space(frozen).fit(d[cols], d[target])
                 test_pred[model_name] = np.clip(model.predict(t[cols]), 0, 100)
                 rows.append({"horizon": f"t+{h}", "features": fs_name, "model": model_name, "cv_mae": cv,
@@ -221,7 +222,7 @@ def tune_whc(table, feature_sets, trials):
     for fs_name, cols in feature_sets.items():
         oof, test_proba = {}, {}
         for model_name, space in CLF_SPACES.items():
-            def objective(trial, space=space, model_name=model_name):
+            def objective(trial, space=space, model_name=model_name, cols=cols):
                 power = 1.0 if model_name == "RandomForest" else trial.suggest_float("weight_power", 0.3, 1.0)
                 return fold_f1(cv_proba(lambda: space(trial), dev, cols, power), y_dev.loc[FOLD_STARTS[0]:])
             study = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler(seed=SEED),
@@ -230,7 +231,7 @@ def tune_whc(table, feature_sets, trials):
             params = dict(study.best_params)
             power = params.pop("weight_power", 1.0)
             frozen = optuna.trial.FixedTrial(study.best_params)
-            oof[model_name] = cv_proba(lambda: space(frozen), dev, cols, power)
+            oof[model_name] = cv_proba(lambda space=space, frozen=frozen: space(frozen), dev, cols, power)
             model = fit_clf(space(frozen), dev[cols], y_dev, power)
             test_proba[model_name] = full_proba(model, test[cols])
             best[(fs_name, model_name)] = study.best_params

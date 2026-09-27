@@ -69,6 +69,24 @@ pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/
 | `notebooks/comfort_climate/36120-26SP-AT2-25522436-comfort_climate-experiment-1.ipynb` | CCI regression experiment |
 | `notebooks/weather_hazard/36120-26SP-AT2-25522436-weather_hazard-experiment-1.ipynb` | WHC classification experiment |
 
+Hyperparameters are tuned with Optuna on three expanding-window folds (scored on 2014–16, 2017–19 and
+2020–22). The notebooks read the saved results from `reports/*_tuning*.{csv,json}`. To reproduce them
+(takes about 1–2 hours per target):
+
+```bash
+N_JOBS=4 OMP_NUM_THREADS=4 uv run python -m weather_experiments.modeling.tune --trials 12 --target both
+```
+
+## Results (test period 2023–2025, never used for model selection)
+
+| Target | Final model | Test result | Best baseline |
+|---|---|---|---|
+| CCI t+1 / t+2 / t+3 | Mean of tuned XGBoost + LightGBM (89 features) | MAE 5.93 / 6.98 / 7.29 | 7.47 / 7.53 / 7.53 |
+| WHC t+7 | Tuned XGBoost, class weights `balanced ** 0.72` (161 features) | Macro-F1 0.277 | 0.256 (monthly climatology) |
+
+The WHC model beats the baselines, but it did not identify any of the 45 High/Extreme test days.
+Details and discussion are in the notebooks and the final report.
+
 ## Project organisation
 
 ```
@@ -87,7 +105,16 @@ pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/
 └── weather_experiments/   <- Project source code
     ├── config.py          <- Paths, location, date boundaries, split dates
     ├── dataset.py         <- Open-Meteo download and processed dataset build
-    ├── features.py
-    ├── plots.py
+    ├── features.py        <- Model table (shiftguard features + targets), feature groups
     └── modeling/
+        ├── compare.py     <- Baseline / algorithm / feature-set comparison
+        ├── tune.py        <- Optuna tuning (time-series folds)
+        └── predict.py     <- Offline inference with the saved artefacts for a given date
 ```
+
+Final models are trained and saved in section K of each notebook (refitted on all labelled data up to
+2025). Check them offline with `uv run python -m weather_experiments.modeling.predict 2025-06-01`.
+
+## Data attribution
+
+Weather data by [Open-Meteo.com](https://open-meteo.com/), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).

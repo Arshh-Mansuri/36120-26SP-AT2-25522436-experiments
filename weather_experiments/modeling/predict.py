@@ -1,29 +1,46 @@
-from pathlib import Path
+"""Offline inference with the saved production artefacts for any input date in the processed dataset.
 
+Example: uv run python -m weather_experiments.modeling.predict 2025-06-01
+"""
+
+from datetime import timedelta
+
+import joblib
 from loguru import logger
-from tqdm import tqdm
+import numpy as np
+import pandas as pd
 import typer
 
-from weather_experiments.config import MODELS_DIR, PROCESSED_DATA_DIR
+from weather_experiments.config import MODELS_DIR
+from weather_experiments.features import build_model_table
 
 app = typer.Typer()
 
+CCI_ARTEFACT = MODELS_DIR / "comfort_climate" / "comfort_climate_ensemble.joblib"
+WHC_ARTEFACT = MODELS_DIR / "weather_hazard" / "weather_hazard_xgb.joblib"
+
 
 @app.command()
-def main(
-    # ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
-    features_path: Path = PROCESSED_DATA_DIR / "test_features.csv",
-    model_path: Path = MODELS_DIR / "model.pkl",
-    predictions_path: Path = PROCESSED_DATA_DIR / "test_predictions.csv",
-    # -----------------------------------------
-):
-    # ---- REPLACE THIS WITH YOUR OWN CODE ----
-    logger.info("Performing inference for model...")
-    for i in tqdm(range(10), total=10):
-        if i == 5:
-            logger.info("Something happened for iteration 5.")
-    logger.success("Inference complete.")
-    # -----------------------------------------
+def main(input_date: str):
+    day = pd.Timestamp(input_date)
+    table, _ = build_model_table()
+    if day not in table.index:
+        raise typer.BadParameter(f"{day.date()} is not in the processed dataset (needs 30 days of history).")
+
+    cci = joblib.load(CCI_ARTEFACT)
+    X = table.loc[[day], cci["features"]]
+    low, high = cci["output_range"]
+    for h in cci["horizons"]:
+        pred = np.clip(np.mean([m.predict(X)[0] for m in cci["models"][f"t+{h}"]]), low, high)
+        actual = table.loc[day, f"target_cci_t{h}"]
+        logger.info(f"CCI {(day + timedelta(days=h)).date()}: predicted {pred:.1f} | actual {actual:.1f}")
+
+    whc = joblib.load(WHC_ARTEFACT)
+    label = int(whc["model"].predict(table.loc[[day], whc["features"]])[0])
+    actual = table.loc[day, "target_whc_t7"]
+    actual_label = whc["labels"][int(actual)] if pd.notna(actual) else "unknown"
+    logger.info(f"WHC {(day + timedelta(days=whc['horizon'])).date()}: predicted {whc['labels'][label]} "
+                f"| actual {actual_label}")
 
 
 if __name__ == "__main__":

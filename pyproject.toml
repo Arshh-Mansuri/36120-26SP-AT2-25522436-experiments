@@ -53,6 +53,9 @@ url = "https://test.pypi.org/simple/"
 explicit = true
 
 
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
 [tool.ruff]
 line-length = 99
 src = ["weather_experiments"]
